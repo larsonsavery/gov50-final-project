@@ -115,7 +115,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/header-attrs-2.16/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["ccpcnc_v4_small.csv","Constitution.pdf","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/figure-html5/unnamed-chunk-12-1.png","index_files/figure-html5/unnamed-chunk-14-1.png","index_files/header-attrs-2.16/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js","V-Dem.csv"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1529,7 +1529,164 @@ Research Question: How did percentage of workers in the manufacturing sector, un
 <a href="https://projects.fivethirtyeight.com/2020-general-data/presidential_poll_averages_2020.csv" class="uri">https://projects.fivethirtyeight.com/2020-general-data/presidential_poll_averages_2020.csv</a></p>
 <p>Election Results:
 <a href="https://www.fec.gov/resources/cms-content/documents/federalelections2016.pdf" class="uri">https://www.fec.gov/resources/cms-content/documents/federalelections2016.pdf</a></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<p>Milestone 3:
+I have completely pivoted to a new topic. Now I am investigating constitutional emergency powers enumeration and how it affects government liberality in the Post-Cold War world. So far I have created two graphs. See below.
+—
+title: “Constitutions”
+output:
+pdf_document: default
+html_document: default
+date: “2022-10-30”
+—</p>
+<h2 id="r-markdown">R Markdown</h2>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://dplyr.tidyverse.org'>dplyr</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/tidymodels/infer'>infer</a></span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>constitution</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://readr.tidyverse.org/reference/read_delim.html'>read_csv</a></span><span class='op'>(</span><span class='st'>"ccpcnc_v4_small.csv"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>constitution</span> <span class='op'>&lt;-</span> <span class='va'>constitution</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='va'>em</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>country</span><span class='op'>:</span><span class='va'>evnttype</span>, <span class='va'>em</span><span class='op'>:</span><span class='va'>emother_98</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>year</span> <span class='op'>&gt;</span> <span class='st'>"1988"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>liberal</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://readr.tidyverse.org/reference/read_delim.html'>read_csv</a></span><span class='op'>(</span><span class='st'>"V-Dem.csv"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>liberal</span> <span class='op'>&lt;-</span> <span class='va'>liberal</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>country_name</span>, <span class='va'>year</span>, <span class='va'>v2x_libdem</span>, <span class='va'>v2mecenefm</span>, </span>
+<span>         <span class='va'>v2mecenefi</span>, <span class='va'>v2mecrit</span>, <span class='va'>v2mebias</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>year</span> <span class='op'>&gt;</span> <span class='st'>"1988"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+Finding differences in country names to prevent errors in <code>inner_join</code>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>#unique(liberal$country_name)</span></span>
+<span><span class='co'>#unique(constitution$country)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>liberal</span> <span class='op'>&lt;-</span> <span class='va'>liberal</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/rename.html'>rename</a></span><span class='op'>(</span>country <span class='op'>=</span> <span class='va'>country_name</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+##Filtering out duplicate data in constitution
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='co'>##This filters out all Serbia data, why isn't the "and" function (&amp;) not working</span></span>
+<span><span class='va'>constitution</span> <span class='op'>&lt;-</span> <span class='va'>constitution</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>country</span> <span class='op'>!=</span> <span class='st'>"Serbia"</span> <span class='op'>&amp;</span> <span class='va'>year</span> <span class='op'>!=</span> <span class='st'>"2006"</span><span class='op'>)</span>  </span></code></pre>
+</div>
+</div>
+##Left Join
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>joined</span> <span class='op'>&lt;-</span> <span class='va'>constitution</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></span><span class='op'>(</span><span class='va'>liberal</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>country</span>, <span class='va'>year</span>, <span class='va'>v2x_libdem</span>, <span class='va'>em</span>, <span class='va'>emdecl</span>, <span class='va'>emappr_1</span>, <span class='va'>emappr_2</span><span class='op'>)</span> </span></code></pre>
+</div>
+</div>
+<p>##Summarizing variables</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>joined</span> <span class='op'>&lt;-</span> <span class='va'>joined</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>emdecl <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>~</span> <span class='st'>"Head of State"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>2</span> <span class='op'>~</span> <span class='st'>"Head of Government"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>3</span> <span class='op'>~</span> <span class='st'>"Head of State or Head of Gov"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>4</span> <span class='op'>~</span> <span class='st'>"Gov/Cabinet"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>5</span> <span class='op'>~</span> <span class='st'>"1st Legislative Chamber"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>6</span> <span class='op'>~</span> <span class='st'>"2nd Legislative Chamber"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>7</span> <span class='op'>~</span> <span class='st'>"Both Chambers"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>90</span> <span class='op'>~</span> <span class='st'>"Left to law"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>96</span> <span class='op'>~</span> <span class='st'>"Other"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>97</span> <span class='op'>~</span> <span class='st'>"Unknown"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>98</span> <span class='op'>~</span> <span class='st'>"Not Specified"</span>,</span>
+<span>    <span class='va'>emdecl</span> <span class='op'>==</span> <span class='fl'>99</span> <span class='op'>~</span> <span class='st'>"Not Applicable"</span></span>
+<span>  <span class='op'>)</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>target_data</span> <span class='op'>&lt;-</span> <span class='va'>joined</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>emdecl</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>mean_liberal <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>v2x_libdem</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'>#|&gt;</span></span>
+<span>  <span class='co'>#pivot_wider(names_from = emdecl, values_from = mean_liberal)  </span></span>
+<span><span class='va'>target_data</span></span></code></pre>
+</div>
+<pre><code># A tibble: 9 × 2
+  emdecl                       mean_liberal
+  &lt;chr&gt;                               &lt;dbl&gt;
+1 1st Legislative Chamber             0.441
+2 Both Chambers                       0.477
+3 Gov/Cabinet                         0.516
+4 Head of Government                  0.553
+5 Head of State                       0.344
+6 Head of State or Head of Gov        0.489
+7 Not Applicable                      0.604
+8 Not Specified                       0.745
+9 Other                               0.468</code></pre>
+</div>
+Bar Plot
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>target_data</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>emdecl</span>,  y <span class='op'>=</span> <span class='va'>mean_liberal</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"identity"</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_discrete.html'>scale_x_discrete</a></span><span class='op'>(</span>guide <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/guide_axis.html'>guide_axis</a></span><span class='op'>(</span>n.dodge<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Who Declares State of Emergencies"</span>,</span>
+<span>       y <span class='op'>=</span> <span class='st'>"V-Dem Liberal Democracy Index"</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-12-1.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>joined</span> <span class='op'>&lt;-</span> <span class='va'>joined</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>em <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>    <span class='va'>em</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>~</span> <span class='st'>"Provision"</span>,</span>
+<span>    <span class='va'>em</span> <span class='op'>==</span> <span class='fl'>2</span> <span class='op'>~</span> <span class='st'>"No Provision"</span>,</span>
+<span>    <span class='va'>em</span> <span class='op'>==</span> <span class='fl'>96</span> <span class='op'>~</span> <span class='st'>"Other"</span>,</span>
+<span>    <span class='va'>em</span> <span class='op'>==</span> <span class='fl'>97</span> <span class='op'>~</span> <span class='st'>"unknown"</span><span class='op'>)</span></span>
+<span>      <span class='op'>)</span></span>
+<span><span class='va'>target_data2</span> <span class='op'>&lt;-</span> <span class='va'>joined</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>em</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>mean_liberal <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>v2x_libdem</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/ranking.html'>row_number</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='op'>(</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span></span>
+<span><span class='va'>target_data2</span></span></code></pre>
+</div>
+<pre><code># A tibble: 2 × 2
+  em           mean_liberal
+  &lt;chr&gt;               &lt;dbl&gt;
+1 No Provision        0.579
+2 Provision           0.391</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>target_data2</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>em</span>, y <span class='op'>=</span> <span class='va'>mean_liberal</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_bar</a></span><span class='op'>(</span>stat <span class='op'>=</span> <span class='st'>"identity"</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Provision on Calling a State of Emergency in the Constitution"</span>, </span>
+<span>       y <span class='op'>=</span> <span class='st'>"V-Dem Liberal Democracy Index"</span>,</span>
+<span>       title <span class='op'>=</span> <span class='st'>"Effect of Having a Provision About State of Emergencies on Liberal Democracy"</span><span class='op'>)</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-14-1.png" width="624" /></p>
+</div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
