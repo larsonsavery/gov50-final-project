@@ -32,6 +32,17 @@ https://www.fec.gov/resources/cms-content/documents/federalelections2016.pdf
 
 Milestone 3: 
 I have completely pivoted to a new topic. Now I am investigating constitutional emergency powers enumeration and how it affects government liberality in the Post-Cold War world. So far I have created two graphs. See below.
+
+Milestone 4: Topic Update:
+My project focuses on constitutional provisions on states of emergency and they affect liberal principles such as tyranny of the state, tyranny of the majority, strong rule of law, protection of civil liberties an independent, judiciary, and effective checks and balances. I am most interested in whether or not having a state of emergency clause changes the liberal score and whether or not that state of emergency suspends or restricts rights changes the liberal score.
+
+Hypothesis: 
+1. Clausses allowing for states of emergency decrease liberal democracy,
+Clauses that restrict or suspend rights during states of emergencies decrease liberal democracy.
+
+Results: see tables at the bottom
+
+
 ---
 title: "Constitutions"
 output:
@@ -40,9 +51,7 @@ output:
 date: "2022-10-30"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## R Markdown
 
@@ -50,6 +59,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
 library(infer)
+library(stringr)
+library(broom)
 
 ```
 
@@ -61,8 +72,8 @@ constitution <- read_csv("ccpcnc_v4_small.csv")
 ```{r}
 constitution <- constitution |>
   drop_na(em) |>
-  select(country:evnttype, em:emother_98) |>
-  filter(year > "1988")
+  select(country, year, em, emrights, emdecl) |>
+  filter(year > "1991")
 ```
 
 ```{r}
@@ -71,9 +82,9 @@ liberal <- read_csv("V-Dem.csv")
 
 ```{r}
 liberal <- liberal |>
-  select(country_name, year, v2x_libdem, v2mecenefm, 
+  select(country_name, year, v2x_liberal, v2mecenefm, 
          v2mecenefi, v2mecrit, v2mebias) |>
-  filter(year > "1988")
+  filter(year > "1991")
 ```
 
 Finding differences in country names to prevent errors in `inner_join`
@@ -82,12 +93,34 @@ Finding differences in country names to prevent errors in `inner_join`
 #unique(constitution$country)
 ```
 
+Renaming Variables
+
+
 ```{r}
 liberal <- liberal |>
   rename(country = country_name)
 ```
 
+
+
+Using Stingr to standarize country names:
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+liberal <- liberal |>
+  mutate(across('country', str_replace, 'Burma/Myanmar', 'Myanmar'),
+         across('country', str_replace, 'The Gambia', 'Gambia'),
+         across('country', str_replace, 'Republic of the Congo', 'Congo'))
+
+liberal
+```
+
+
 ##Filtering out duplicate data in constitution
+
 ```{r}
 ##This filters out all Serbia data, why isn't the "and" function (&) not working
 constitution <- constitution |>
@@ -95,14 +128,20 @@ constitution <- constitution |>
 
 ```
 
-##Left Join
+
+## Left Join
+
+
 ```{r}
 joined <- constitution |>
   left_join(liberal) |>
-  select(country, year, v2x_libdem, em, emdecl, emappr_1, emappr_2) 
+  select(country, year, v2x_liberal, em, emrights, emdecl) 
 ```
 
-##Summarizing variables
+
+
+Importing better names for variable outcomes
+
 
 ```{r}
 joined <- joined |>
@@ -122,27 +161,29 @@ joined <- joined |>
   ))
 
 ```
+
+##Does this have an effect?
+
+
+Checking to see if who authorizes states of emergencies according to the constitution affects liberality. The results are not very interesting, perhaps this could be an interesting cofounder?
+
+
 ```{r}
 target_data <- joined |>
   group_by(emdecl) |>
-  summarize(mean_liberal = mean(v2x_libdem, na.rm = TRUE)) #|>
+  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) #|>
   #pivot_wider(names_from = emdecl, values_from = mean_liberal)  
 target_data
 ```
 
 
-Bar Plot
-```{r}
-target_data |>
-  ggplot(aes(x = emdecl,  y = mean_liberal)) +
-  geom_bar(stat = "identity") +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  labs(x = "Who Declares State of Emergencies",
-       y = "V-Dem Liberal Democracy Index")
-  
 
-  
-```
+
+
+
+## Mutating Provision on State of Emergency Variable (em)
+
+
 ```{r}
 joined <- joined |>
   mutate(em = case_when(
@@ -151,23 +192,134 @@ joined <- joined |>
     em == 96 ~ "Other",
     em == 97 ~ "unknown")
       )
-target_data2 <- joined |>
-  group_by(em) |>
-  summarize(mean_liberal = mean(v2x_libdem, na.rm = TRUE)) |>
-  filter(!row_number() %in% (2))
-target_data2
 ```
 
+
 ```{r}
-target_data2 |>
+provision_emerg <- joined |>
+  group_by(em) |>
+  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) |>
+  filter(!row_number() %in% (2))
+provision_emerg
+```
+
+
+
+
+## Provision (em) Barplot
+
+
+```{r}
+provision_barplot <- provision_emerg |>
   ggplot(aes(x = em, y = mean_liberal)) +
   geom_bar(stat = "identity") +
   labs(x = "Provision on Calling a State of Emergency in the Constitution", 
-       y = "V-Dem Liberal Democracy Index",
-       title = "Effect of Having a Provision About State of Emergencies on Liberal Democracy")
+       y = "V-Dem Liberal Index",
+       title = "Effect of Having a Provision About States of Emergency on Liberality") 
+ggsave("provision_barplot.png", provision_barplot) 
+
+
+```
+![](provision_barplot.png)
+
+
+
+
+
+
+
+## Mutating Provision on State of Emergency Variable (emrights)
+
+
+```{r}
+joined <- joined |>
+    mutate(emrights = case_when(
+    emrights == 1 ~ "Suspension",
+    emrights == 2 ~ "No Suspension",
+    emrights == 96 ~ "Other",
+    emrights == 97 ~ "unknown")
+      )
 ```
 
 
+
+```{r}
+provision_rights <- joined |>
+  group_by(emrights) |>
+  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) |>
+  filter(!row_number() %in% (2) )
+provision_rights
+```
+
+
+
+
+
+
+
+## Suspension (emrights) Barplot
+
+```{r}
+suspension_barplot <- provision_rights |>
+  ggplot(aes(x = emrights, y = mean_liberal)) +
+  geom_bar(stat = "identity") +
+  labs(x = "State of Emergency Clause Suspends/Restricts Rights", 
+       y = "V-Dem Liberal Index",
+       title = "Effect of Clause on Restricting/Suspending Rights during States of Emergency on Liberality")
+
+ggsave("suspension_barplot.png", suspension_barplot)
+```
+![](suspension_barplot.png)
+
+
+
+
+
+
+## Provision Regression: 
+
+
+
+
+These results suggest that a strong casual relationship exists between countries having a provision in their constituions regarding states of emergency and their liberal score. Surprisingly, this constitutional characteristic actually increases the liberal score 13.334% relative to not having it. These results are likely statistically significant as the p-value is zero which rejects the null hyphotesis that their is no corrolation.
+
+
+```{r}
+suspension_lm <- lm(v2x_liberal ~ em, data = joined)
+
+suspension_lm |>
+  tidy() |>
+  knitr::kable(caption = "Coefficient Estimates for State of Emergency Clause on Liberal Score",
+               col.names = c("Predictor", "Estimate", "Std. Error", "Statistic", "P-value"),
+               digits = c(0, 5, 3, 2, 3))
+
+```
+
+
+
+
+
+
+## Suspension/restriction Regression:
+
+
+
+These results suggest that a strong casual relationship exists between countries having a provision in their constitutions suspending or restricting rights during a state of emergency and their liberal score. Surprisingly this constitutional characteristic actually increases the liberal score 13.342% relative to not having it. These results are likely statistically significant as the p-value is zero which rejects the null hyphotesis that their is no corrolation.
+
+
+
+```{r}
+suspension_lm <- lm(v2x_liberal ~ emrights, data = joined)
+
+suspension_lm |>
+  tidy() |>
+  knitr::kable(caption = "Coefficient Estimates for Suspension of Rights on Liberal Score",
+               col.names = c("Predictor", "Estimate", "Std. Error", "Statistic", "P-value"),
+               digits = c(0, 5, 3, 2, 3))
+
+
+ #apparently there is another type of regression for binary variables, logistic regression, glm function, generalized linear model, need to specify family to specify more complicated variables, explore more in the coming week
+```
   
 
 
