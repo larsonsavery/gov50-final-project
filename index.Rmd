@@ -8,7 +8,6 @@ output:
 ---
 
 
-
 ## Project thoughts
 
 Milestone 1:
@@ -77,13 +76,14 @@ constitution <- constitution |>
 ```
 
 ```{r}
-liberal <- read_csv("V-Dem.csv")
+liberal <- read_csv("V-Dem_v3.csv")
 ```
+
+
 
 ```{r}
 liberal <- liberal |>
-  select(country_name, year, v2x_liberal, v2mecenefm, 
-         v2mecenefi, v2mecrit, v2mebias) |>
+  select(country_name, year, v2x_liberal, v2x_corr, e_regionpol_6C) |> #add e_regionpol_6C variable, not letting me select many new variables even ones listed above
   filter(year > "1991")
 ```
 
@@ -94,8 +94,6 @@ Finding differences in country names to prevent errors in `inner_join`
 ```
 
 Renaming Variables
-
-
 ```{r}
 liberal <- liberal |>
   rename(country = country_name)
@@ -103,9 +101,7 @@ liberal <- liberal |>
 
 
 
-Using Stingr to standarize country names:
-
-
+Using Stingr Package to standardize country names so they do not get dropped when the datasets merge:
 ```{r}
 library(tidyverse)
 library(dplyr)
@@ -119,8 +115,7 @@ liberal
 ```
 
 
-##Filtering out duplicate data in constitution
-
+##Filtering out duplicate data in `constitution`
 ```{r}
 ##This filters out all Serbia data, why isn't the "and" function (&) not working
 constitution <- constitution |>
@@ -130,69 +125,53 @@ constitution <- constitution |>
 
 
 ## Left Join
-
-
 ```{r}
 joined <- constitution |>
   left_join(liberal) |>
-  select(country, year, v2x_liberal, em, emrights, emdecl) 
+  select(country, year, v2x_liberal, em, emrights, emdecl, e_regionpol_6C) 
 ```
 
 
 
-Importing better names for variable outcomes
-
-
+## Mutating `e_regionpol_6C` to give it descriptive region names.
 ```{r}
 joined <- joined |>
-  mutate(emdecl = case_when(
-    emdecl == 1 ~ "Head of State",
-    emdecl == 2 ~ "Head of Government",
-    emdecl == 3 ~ "Head of State or Head of Gov",
-    emdecl == 4 ~ "Gov/Cabinet",
-    emdecl == 5 ~ "1st Legislative Chamber",
-    emdecl == 6 ~ "2nd Legislative Chamber",
-    emdecl == 7 ~ "Both Chambers",
-    emdecl == 90 ~ "Left to law",
-    emdecl == 96 ~ "Other",
-    emdecl == 97 ~ "Unknown",
-    emdecl == 98 ~ "Not Specified",
-    emdecl == 99 ~ "Not Applicable"
-  ))
-
+  mutate(e_regionpol_6C = case_when(
+    e_regionpol_6C == 1 ~ "Eastern Europe + Central Asia",
+    e_regionpol_6C == 2 ~ "Latin America + Caribbean",
+    e_regionpol_6C == 3 ~ "MENA",
+    e_regionpol_6C == 4 ~ "Sub-Saharan Africa",
+    e_regionpol_6C == 5 ~ "Western Europe + North America",
+    e_regionpol_6C == 6 ~ "Asia + Pacific",
+    em == 97 ~ "unknown")
+  )
 ```
-
-##Does this have an effect?
-
-
-Checking to see if who authorizes states of emergencies according to the constitution affects liberality. The results are not very interesting, perhaps this could be an interesting cofounder?
-
-
-```{r}
-target_data <- joined |>
-  group_by(emdecl) |>
-  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) #|>
-  #pivot_wider(names_from = emdecl, values_from = mean_liberal)  
-target_data
-```
-
-
-
 
 
 
 ## Mutating Provision on State of Emergency Variable (em)
-
 
 ```{r}
 joined <- joined |>
   mutate(em = case_when(
     em == 1 ~ "Provision",
     em == 2 ~ "No Provision",
-    em == 96 ~ "Other",
-    em == 97 ~ "unknown")
-      )
+    em == 96 ~ "other",
+    em == 97 ~ "unknown"),
+      ) |>
+  mutate(em = str_remove(emrights))
+ 
 ```
+
+
+```{r}
+joined |>
+  ggplot(aes(x = v2x_liberal)) +
+  geom_histogram() +
+  geom_vline(xintercept = 0.7379366) +
+  geom_vline(xintercept = 0.6045941)
+```
+
 
 
 ```{r}
@@ -237,8 +216,10 @@ joined <- joined |>
     emrights == 1 ~ "Suspension",
     emrights == 2 ~ "No Suspension",
     emrights == 96 ~ "Other",
-    emrights == 97 ~ "unknown")
-      )
+    emrights == 97 ~ "unknown")) |>
+    mutate(emrights = str_remove(emrights, "other"))
+    
+joined  
 ```
 
 
@@ -284,6 +265,8 @@ ggsave("suspension_barplot.png", suspension_barplot)
 These results suggest that a strong casual relationship exists between countries having a provision in their constituions regarding states of emergency and their liberal score. Surprisingly, this constitutional characteristic actually increases the liberal score 13.334% relative to not having it. These results are likely statistically significant as the p-value is zero which rejects the null hyphotesis that their is no corrolation.
 
 
+For this regression, how do I get ride of emOther so I can run a multiple regression with 
+drop other cases from data, group them using mutate call create if_else, case_when, when its in these sets of values code them as missing
 ```{r}
 suspension_lm <- lm(v2x_liberal ~ em, data = joined)
 
@@ -294,8 +277,6 @@ suspension_lm |>
                digits = c(0, 5, 3, 2, 3))
 
 ```
-
-
 
 
 
@@ -318,8 +299,15 @@ suspension_lm |>
                digits = c(0, 5, 3, 2, 3))
 
 
- #apparently there is another type of regression for binary variables, logistic regression, glm function, generalized linear model, need to specify family to specify more complicated variables, explore more in the coming week
+#need to find potential cofounders
 ```
   
+
+```{r}
+big_lm <- lm(v2x_liberal ~ em + emrights, data = joined)
+big_lm
+
+#model_summary
+```
 
 
