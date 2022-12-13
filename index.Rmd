@@ -178,12 +178,11 @@ dependent_plot <- joined |>
        x = "Liberal Component Index",
        y = "Number of Instances") +
   theme_bw()
+ggsave("dependent_plot.png", dependent_plot)
 ```
 
-```{r, echo = FALSE}
-dependent_plot
-```
 
+![](dependent_plot.png)
 
 ## Regression Table:
 
