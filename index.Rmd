@@ -1,60 +1,38 @@
 ---
 title: "Gov 50 Final Project"
 author: "Larson Avery"
-description: "Identifying demographic trends and variables that lead polls astray"
+description: "Constitutional Authority to Restrict or Suspend Rights During States of Emergency's Effect on Liberality"
 output:
   distill::distill_article:
     self_contained: false
 ---
 
 
-## Project thoughts
-
-Milestone 1:
-I want to dive into data from a recent federal election, probably related to  House of Representatives races and compare polls leading up to the election with the actual results. I want to combine US Census data with polling to create a large dataset of demographic, economic, or geographic variables. Then I want to investigate if trends in these variables make polls accurate or inaccurate at predicting election outcomes.
-
-Milestone 2:
-Research Question: How did percentage of workers in the manufacturing sector, unemployment, and percent of households making under $15,000 a year affect the accuracy of polls in the 2016 Presidential election? Polls put Hillary Clinton ahead of Donald Trump and while he did not win the popular vote, he did win far more votes than expected due to the undercounting of voters. I want to explore how variables such as rural poverty, loss of manufacturing jobs, and unemployment—issues Trump emphasized—affected how accurate polls were for the 2016 Presidential Election. I hypothesize states with a higher manufacturing share, higher unemployment, and high proportions of poor households increases discrepancies between predicted and actual vote shares in FiveThirtyEight’s model. The explanatory variables are from a table on the US Census website that measure a variety of different economic variables. These are extremely recent and accurate as the Census reaches the vast majority of the US population. The outcome variable is the predicted popular vote for Trump by FiveThirtyEight (measured by aggregating many polls together) minus the final results of the popular vote by state. Each variable will be measured separately. A positive relationship between the variables and poll error with low standard deviation will support my hypothesis whereas a weak relationship or opposite relationship will disprove my hypothesis. 
-
-Unfortunately at this time I have been unable to find FiveThirtyEight’s predicted popular vote share for 2016. I have found this dataset for 2020 on GitHub but a study of those results would be far less interesting as pollsters probably adjusted to polling for Trump between 2016 and 2020.
-
-
-
-Demographic data: https://data.census.gov/cedsci/table?q=employment%20statistics&g=0100000US,%240400000&tid=ACSDP1Y2021.DP03&moe=false&tp=true
-
-Election Polls: *need to find 2016 version
-https://github.com/fivethirtyeight/data/tree/master/election-forecasts-2020 ->
-https://projects.fivethirtyeight.com/2020-general-data/presidential_poll_averages_2020.csv
-
-Election Results:
-https://www.fec.gov/resources/cms-content/documents/federalelections2016.pdf
-
-Milestone 3: 
-I have completely pivoted to a new topic. Now I am investigating constitutional emergency powers enumeration and how it affects government liberality in the Post-Cold War world. So far I have created two graphs. See below.
-
-Milestone 4: Topic Update:
-My project focuses on constitutional provisions on states of emergency and they affect liberal principles such as tyranny of the state, tyranny of the majority, strong rule of law, protection of civil liberties an independent, judiciary, and effective checks and balances. I am most interested in whether or not having a state of emergency clause changes the liberal score and whether or not that state of emergency suspends or restricts rights changes the liberal score.
-
-Hypothesis: 
-1. Clausses allowing for states of emergency decrease liberal democracy,
-Clauses that restrict or suspend rights during states of emergencies decrease liberal democracy.
-
-Results: see tables at the bottom
-
-
 ---
-title: "Constitutions"
+title: "Constitutions, States of Emergency, and Liberality"
 output:
   pdf_document: default
   html_document: default
 date: "2022-10-30"
 ---
 
+## Introduction:
+How does giving the government constitutional authority to suspend or restrict rights during a state of emergency affect liberality? Intuitively, granting the government powers to suspend or restrict rights should make political conditions less liberal and more repressive. Does cross national data sustain this intuition? 
+
+This question is important. States of emergency are often used to as an excuse to repress citizens and expand their powers, which has created critics of the practice from across the political spectrum (The Economist and Mator). These concerns are particularly salient as many governments declared prolonged states of emergency to help combat COVID-19 (Nardi). Analyzing data on constitutional provisions on states of emergency and liberality can help us rationally legitimize or delegitimatize these concerns. The results of this analysis also have interesting implications for constitutional design; if a constitution writer cares about liberality, how should they address states of emergency?
 
 
-## R Markdown
+## Data Discussion:
+My independent variable that measures constitutional data on states of emergency comes from the Comparative Constitutions Project, which aims to “to record the characteristics of national constitutions” (CCP Codebook 4). The variables I used were “Does the constitution have provisions for calling a state of emergency?” (`em`) and “Does the constitution provide for suspension or restriction of rights during states of emergency” (`emrights`) (Elkins and Ginsburg 48). I excluded the few values that were coded as “other” to measure the causal effects of including the clause more effectively. I lumped together cases where `em` was “No Provision” and `emrights` was “No Suspension” to create a variable (`emrights_recode`) that measures if a constitution has a provision suspending or restricting rights regardless of whether the constitution mentions states of emergency. If a constitution does not mention states of emergency, it is coded as “No Suspension”
 
-```{r}
+My dependent variable on liberality comes from the V-Dem dataset which aims to “provide a multidimensional and disaggregated dataset that reflects the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections.” (V-Dem). This variable is called “Liberal Component Index”, coded as `v2x_liberal`, measures the “extent” to which “the liberal principle of democracy is achieved” (Lindberg et. al 49). It is coded from 0 (completely illiberal) to 1 (completely liberal) (Lindberg et. al 49). This variable aggregates measures such as “equality before the law and individual liberates” and “judicial [and] legislative constraints on the executive” (V-Dem Codebook 49). Data is collected by surveying and averaging the opinions of at least five academics or professionals that focus on a particular country. At least two-thirds of them are nationals of the countries they cover (V-Dem). For the control variable (geographic region), V-Dem takes data from the Quality of Government Standard Dataset to sort countries into six politically meaningful geographical bins (Lindberg et. al 361).
+
+All data in this analysis is from the Post-Cold War (after 1991) to ensure that findings are relevant to the modern day and to prevent R from overloading my CPU.
+
+
+
+
+```{r, include = FALSE}
 library(tidyverse)
 library(dplyr)
 library(infer)
@@ -63,46 +41,46 @@ library(broom)
 
 ```
 
-```{r}
+
+```{r, include = FALSE}
+#Loading the constitution dataset
 constitution <- read_csv("ccpcnc_v4_small.csv")
 ```
 
 
-```{r}
+```{r, include = FALSE}
+#selecting variables
 constitution <- constitution |>
   drop_na(em) |>
-  select(country, year, em, emrights, emdecl) |>
+  select(country, year, em, emrights) |>
   filter(year > "1991")
 ```
 
-```{r}
+
+```{r, include = FALSE}
+#Loading V-Dem Dataset
 liberal <- read_csv("V-Dem_v3.csv")
 ```
 
 
 
-```{r}
+```{r, include = FALSE}
+#Selecting variables
 liberal <- liberal |>
-  select(country_name, year, v2x_liberal, v2x_corr, e_regionpol_6C) |> #add e_regionpol_6C variable, not letting me select many new variables even ones listed above
+  select(country_name, year, v2x_liberal, e_regionpol_6C, e_gdppc) |> 
   filter(year > "1991")
 ```
 
-Finding differences in country names to prevent errors in `inner_join`
-```{r}
-#unique(liberal$country_name)
-#unique(constitution$country)
-```
 
-Renaming Variables
-```{r}
+```{r, include = FALSE}
+#Renaming variables to match the constitution dataset
 liberal <- liberal |>
   rename(country = country_name)
 ```
 
 
-
-Using Stingr Package to standardize country names so they do not get dropped when the datasets merge:
-```{r}
+```{r, include = FALSE}
+#Using Stingr Package to standardize country names so they do not get dropped when the datasets merge:
 library(tidyverse)
 library(dplyr)
 library(stringr)
@@ -110,13 +88,12 @@ liberal <- liberal |>
   mutate(across('country', str_replace, 'Burma/Myanmar', 'Myanmar'),
          across('country', str_replace, 'The Gambia', 'Gambia'),
          across('country', str_replace, 'Republic of the Congo', 'Congo'))
-
-liberal
 ```
 
 
-##Filtering out duplicate data in `constitution`
-```{r}
+
+```{r, include = FALSE}
+#Filtering out duplicate data in `constitution`
 ##This filters out all Serbia data, why isn't the "and" function (&) not working
 constitution <- constitution |>
   filter(country != "Serbia" & year != "2006")  
@@ -124,17 +101,20 @@ constitution <- constitution |>
 ```
 
 
-## Left Join
-```{r}
+
+```{r, include = FALSE}
+#Joining the datasets together
 joined <- constitution |>
   left_join(liberal) |>
-  select(country, year, v2x_liberal, em, emrights, emdecl, e_regionpol_6C) 
+  select(country, year, v2x_liberal, e_gdppc, em, emrights, e_regionpol_6C) 
 ```
 
 
 
-## Mutating `e_regionpol_6C` to give it descriptive region names.
-```{r}
+
+
+```{r, include = FALSE}
+#Mutating `e_regionpol_6C` to give it descriptive region names.
 joined <- joined |>
   mutate(e_regionpol_6C = case_when(
     e_regionpol_6C == 1 ~ "Eastern Europe + Central Asia",
@@ -149,165 +129,107 @@ joined <- joined |>
 
 
 
-## Mutating Provision on State of Emergency Variable (em)
-
-```{r}
+```{r, include = FALSE}
+#Mutating `e_regionpol_6C` to give it descriptive region names.
 joined <- joined |>
   mutate(em = case_when(
     em == 1 ~ "Provision",
     em == 2 ~ "No Provision",
-    em == 96 ~ "other",
-    em == 97 ~ "unknown"),
-      ) |>
-  mutate(em = str_remove(emrights))
- 
-```
-
-
-```{r}
-joined |>
-  ggplot(aes(x = v2x_liberal)) +
-  geom_histogram() +
-  geom_vline(xintercept = 0.7379366) +
-  geom_vline(xintercept = 0.6045941)
-```
-
-
-
-```{r}
-provision_emerg <- joined |>
-  group_by(em) |>
-  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) |>
-  filter(!row_number() %in% (2))
-provision_emerg
-```
-
-
-
-
-## Provision (em) Barplot
-
-
-```{r}
-provision_barplot <- provision_emerg |>
-  ggplot(aes(x = em, y = mean_liberal)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Provision on Calling a State of Emergency in the Constitution", 
-       y = "V-Dem Liberal Index",
-       title = "Effect of Having a Provision About States of Emergency on Liberality") 
-ggsave("provision_barplot.png", provision_barplot) 
-
+    em == 96 ~ "Other",
+    em == 97 ~ "Unknown")
+      )
+  #filter(em == c("Provision", "No Provision"))
+  #mutate(across('country', str_replace, 'other', '')) #neither of these actually get rid of the other
+  #mutate(str_remove(emrights, "other"))
 
 ```
-![](provision_barplot.png)
 
 
 
-
-
-
-
-## Mutating Provision on State of Emergency Variable (emrights)
-
-
-```{r}
+```{r, include = FALSE}
+#Mutating Provision on State of Emergency Variable (emrights)
 joined <- joined |>
     mutate(emrights = case_when(
     emrights == 1 ~ "Suspension",
     emrights == 2 ~ "No Suspension",
     emrights == 96 ~ "Other",
-    emrights == 97 ~ "unknown")) |>
-    mutate(emrights = str_remove(emrights, "other"))
-    
-joined  
+    emrights == 97 ~ "unknown")) 
 ```
 
 
 
-```{r}
-provision_rights <- joined |>
-  group_by(emrights) |>
-  summarize(mean_liberal = mean(v2x_liberal, na.rm = TRUE)) |>
-  filter(!row_number() %in% (2) )
-provision_rights
+```{r, include = FALSE}
+#Creating `emrights_recode` Variable
+new_joined <- joined |> 
+  mutate(emrights_recode = if_else(is.na(emrights), "No Suspension", emrights)) |> 
+  filter(em != "Other" & emrights_recode != "Other")
 ```
 
 
 
+## Plot Summarizing the Dependent Variable
 
 
-
-
-## Suspension (emrights) Barplot
-
-```{r}
-suspension_barplot <- provision_rights |>
-  ggplot(aes(x = emrights, y = mean_liberal)) +
-  geom_bar(stat = "identity") +
-  labs(x = "State of Emergency Clause Suspends/Restricts Rights", 
-       y = "V-Dem Liberal Index",
-       title = "Effect of Clause on Restricting/Suspending Rights during States of Emergency on Liberality")
-
-ggsave("suspension_barplot.png", suspension_barplot)
+```{r, include = FALSE}
+dependent_plot <- joined |>
+  ggplot(aes(x = v2x_liberal)) +
+  geom_histogram() +
+  labs(title = "Distribution of Liberal Component Index",
+       x = "Liberal Component Index",
+       y = "Number of Instances") +
+  theme_bw()
 ```
-![](suspension_barplot.png)
+
+```{r, echo = FALSE}
+dependent_plot
+```
 
 
+## Regression Table:
 
 
+```{r, include = FALSE}
+library(modelsummary)
+suspension_multi_lm <- lm(v2x_liberal ~ emrights_recode + e_regionpol_6C, data = new_joined)
+```
 
-
-## Provision Regression: 
-
-
-
-
-These results suggest that a strong casual relationship exists between countries having a provision in their constituions regarding states of emergency and their liberal score. Surprisingly, this constitutional characteristic actually increases the liberal score 13.334% relative to not having it. These results are likely statistically significant as the p-value is zero which rejects the null hyphotesis that their is no corrolation.
-
-
-For this regression, how do I get ride of emOther so I can run a multiple regression with 
-drop other cases from data, group them using mutate call create if_else, case_when, when its in these sets of values code them as missing
-```{r}
-suspension_lm <- lm(v2x_liberal ~ em, data = joined)
-
-suspension_lm |>
-  tidy() |>
-  knitr::kable(caption = "Coefficient Estimates for State of Emergency Clause on Liberal Score",
-               col.names = c("Predictor", "Estimate", "Std. Error", "Statistic", "P-value"),
-               digits = c(0, 5, 3, 2, 3))
-
+```{r, echo = FALSE}
+modelsummary::modelsummary(suspension_multi_lm,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
 ```
 
 
 
 
-## Suspension/restriction Regression:
+## Results
+Controlled for geographic region, countries with constitutions that allow for the suspension or restriction of rights during states of emergency are on average 8.6 percent more liberal. These results seem statistically significant as the p-value of `emrights_recode` is less than 0.001. This p-value means that given the data, the measured change in the `v2x_liberal` value had less than a 0.1 percent chance of being due to random chance. To calculate statistical significance, I assume that country-year `v2x_liberal` values are statistically independent. To do otherwise would be outside the scope of the class.
 
 
 
-These results suggest that a strong casual relationship exists between countries having a provision in their constitutions suspending or restricting rights during a state of emergency and their liberal score. Surprisingly this constitutional characteristic actually increases the liberal score 13.342% relative to not having it. These results are likely statistically significant as the p-value is zero which rejects the null hyphotesis that their is no corrolation.
+
+## Conclusion
+Controlled for geographical region, there is a positive relationship between constitutional permission to suspend or restrict rights during state of emergencies and liberality. Its inclusion is linked with an 8.6 percent increase in liberality. Yet it is hard to determine the correct causal chain. These results imply that constitutions that allow for the restriction of rights during states of emergency create more liberal conditions. But the reverse could be true. Liberal conditions promote free debate and discussion. This dialogue may lead to better constitutional design where flexibility in the face of emergency is considered. These results may also be incomplete due to missing data and errors. For instance, the V-Dem dataset includes no data about the United States, small island nations such as Micronesia and Saint Lucia, or small city-state nations such as Monaco or Andorra. Additionally, due to data duplication errors, Serbia was dropped from the dataset. In the future, these results should be controlled with more variables. I tested GDP per capita, which yielded stronger constitutional correlations, but due to missing data, they decreased the sample size greatly and were thus not included. In the future, a project should take advantage of V-Dem’s database of years in which state of emergency were declared to create a before-and-after research design to better understand the causal effect of states of emergency on liberality.  
 
 
 
-```{r}
-suspension_lm <- lm(v2x_liberal ~ emrights, data = joined)
-
-suspension_lm |>
-  tidy() |>
-  knitr::kable(caption = "Coefficient Estimates for Suspension of Rights on Liberal Score",
-               col.names = c("Predictor", "Estimate", "Std. Error", "Statistic", "P-value"),
-               digits = c(0, 5, 3, 2, 3))
 
 
-#need to find potential cofounders
-```
-  
 
-```{r}
-big_lm <- lm(v2x_liberal ~ em + emrights, data = joined)
-big_lm
+## Works Cited
 
-#model_summary
-```
+Mator, A. (2020). COVID-19: The Road to Tyranny is Paved with Pandemics. The Imaginative Conservative. https://theimaginativeconservative.org/2020/04/covid-19-road-tyranny-pandemics-anthony-mator.html
+	
+A New Low for Global Democracy. (2022). The Economist. https://www.economist.com/graphic-detail/2022/02/09/a-new-low-for-global-democracy 	
+
+Nardi, F. (2021). It’s Time to Reconsider State of Emergency Declarations for Sustained Crises. Georgetown Law. 	
+
+The V-Dem Project.  The V-Dem Institute. https://www.v-dem.net/about/v-dem-project/
+	
+Lindberg et. al. (2016). V-Dem Codebook v12. 	
+
+Elkins, Z. and Ginsburg, T. (2022). Characteristics of National Constitutions. 	
+
 
 
